@@ -21,7 +21,7 @@ case class Dag(meta: Dag.DagMeta, graph: Graph[Dag.NodeDef, LDiEdge])
 
     val ctx = Book.Context("schema")
 
-    graph.topologicalSort
+    graph.topologicalSort.flatMap(???) // bad
     new Book(this, null)
   }
 }
