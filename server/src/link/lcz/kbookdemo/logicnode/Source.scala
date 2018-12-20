@@ -1,12 +1,12 @@
 package link.lcz.kbookdemo.logicnode
 
-import link.lcz.kbookdemo.Book
+import link.lcz.kbookdemo.KBook
 
-abstract class Source(ctx: Book.Context, nd: LogicNode.NodeDef) extends LogicNode(ctx, nd) {
-  def outbounds(): LogicNode.Bounds
+abstract class Source(ctx: KBook.Context, nd: LogicNode.NodeDef) extends LogicNode(ctx, nd) with Predecessor {
+  override def outbounds: LogicNode.Bounds
 }
 
 object Source {
-  def apply(ctx: Book.Context, nd: LogicNode.NodeDef): Source =
+  def apply(ctx: KBook.Context, nd: LogicNode.NodeDef): Source =
     LogicNode.reflect[Source](nd.meta.clazz)(ctx, nd)
 }

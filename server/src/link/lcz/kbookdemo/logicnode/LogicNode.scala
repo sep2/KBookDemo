@@ -1,15 +1,17 @@
 package link.lcz.kbookdemo.logicnode
 
 import com.typesafe.scalalogging.LazyLogging
-import link.lcz.kbookdemo.{Book, Dag, KBookConfig}
+import link.lcz.kbookdemo.{Dag, KBook}
 import org.apache.avro.Schema
 import org.apache.avro.generic.{GenericData, GenericRecord}
 import org.apache.kafka.streams.scala.kstream.KStream
 
-import scala.util.{Failure, Success, Try}
+import scala.util.Try
 
-abstract class LogicNode(ctx: Book.Context, nd: LogicNode.NodeDef)
-    extends LazyLogging {}
+abstract class LogicNode(ctx: KBook.Context, nd: LogicNode.NodeDef)
+  extends LazyLogging {
+  val uuid = nd.meta.uuid
+}
 
 object LogicNode {
   type NodeDef = Dag.NodeDef
@@ -31,10 +33,10 @@ object LogicNode {
         schema.getField(x._1).schema().getType match {
           case Schema.Type.STRING => x._2.asInstanceOf[AnyRef]
           case Schema.Type.DOUBLE => x._2.toDouble.asInstanceOf[AnyRef]
-          case Schema.Type.FLOAT  => x._2.toFloat.asInstanceOf[AnyRef]
-          case Schema.Type.INT    => x._2.toInt.asInstanceOf[AnyRef]
-          case Schema.Type.LONG   => x._2.toLong.asInstanceOf[AnyRef]
-          case unknown            => throw new RuntimeException(s"unknown type: $unknown")
+          case Schema.Type.FLOAT => x._2.toFloat.asInstanceOf[AnyRef]
+          case Schema.Type.INT => x._2.toInt.asInstanceOf[AnyRef]
+          case Schema.Type.LONG => x._2.toLong.asInstanceOf[AnyRef]
+          case unknown => throw new RuntimeException(s"unknown type: $unknown")
         }
       }.foreach(r.put(x._1, _))
     }

@@ -5,8 +5,8 @@ import com.typesafe.scalalogging.LazyLogging
 
 import scala.collection.mutable
 
-object BookRunner extends LazyLogging {
-  def props: Props = Props[BookRunner]
+object KBookRunner extends LazyLogging {
+  def props: Props = Props[KBookRunner]
 
   case class PostBook(bookDefinition: String)
   case class PlayBook(bookUuid: String)
@@ -14,10 +14,10 @@ object BookRunner extends LazyLogging {
   case class DeleteBook(bookUuid: String)
 }
 
-class BookRunner extends Actor with LazyLogging {
-  import BookRunner._
+class KBookRunner extends Actor with LazyLogging {
+  import KBookRunner._
 
-  private val store = mutable.Set[Book]()
+  private val store = mutable.Set[KBook]()
 
   override def receive = {
     case PostBook(bd)     => {

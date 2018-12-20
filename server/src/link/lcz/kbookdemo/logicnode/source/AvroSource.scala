@@ -1,11 +1,11 @@
 package link.lcz.kbookdemo.logicnode.source
 
-import link.lcz.kbookdemo.Book
+import link.lcz.kbookdemo.KBook
 import link.lcz.kbookdemo.logicnode.LogicNode.Bounds
 import link.lcz.kbookdemo.logicnode.{LogicNode, Source}
 import org.apache.avro.generic.GenericRecord
 
-class AvroSource(ctx: Book.Context, nd: LogicNode.NodeDef)
+class AvroSource(ctx: KBook.Context, nd: LogicNode.NodeDef)
   extends Source(ctx, nd) {
 
   import ctx.Serdes.conversions._
