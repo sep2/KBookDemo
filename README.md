@@ -7,5 +7,5 @@ Incomplete KBookDemo, keep updating
 # Assembly jar
 `mill server.assembly`
 
-# Copyright
+# License
 GNU GPLv3
