@@ -22,7 +22,7 @@ class BookRunner extends Actor with LazyLogging {
   override def receive = {
     case PostBook(bd)     => {
       logger.info("not implemented")
-      store.add(Dag.parse(bd).construct())
+      //store.add(Dag.parse(bd).construct())
     }
     case PlayBook(uuid)   => store.find(_.uuid == uuid)
     case StopBook(uuid)   => store.find(_.uuid == uuid)

@@ -1,7 +1,7 @@
 package link.lcz.kbookdemo.logicnode
 
 import com.typesafe.scalalogging.LazyLogging
-import link.lcz.kbookdemo.{Book, Dag}
+import link.lcz.kbookdemo.{Book, Dag, KBookConfig}
 import org.apache.avro.Schema
 import org.apache.avro.generic.{GenericData, GenericRecord}
 import org.apache.kafka.streams.scala.kstream.KStream
@@ -29,11 +29,11 @@ object LogicNode {
     xs.foreach { x =>
       Try[AnyRef] {
         schema.getField(x._1).schema().getType match {
-          case Schema.Type.STRING => x._2
-          case Schema.Type.DOUBLE => x._2.toDouble
-          case Schema.Type.FLOAT  => x._2.toFloat
-          case Schema.Type.INT    => x._2.toInt
-          case Schema.Type.LONG   => x._2.toLong
+          case Schema.Type.STRING => x._2.asInstanceOf[AnyRef]
+          case Schema.Type.DOUBLE => x._2.toDouble.asInstanceOf[AnyRef]
+          case Schema.Type.FLOAT  => x._2.toFloat.asInstanceOf[AnyRef]
+          case Schema.Type.INT    => x._2.toInt.asInstanceOf[AnyRef]
+          case Schema.Type.LONG   => x._2.toLong.asInstanceOf[AnyRef]
           case unknown            => throw new RuntimeException(s"unknown type: $unknown")
         }
       }.foreach(r.put(x._1, _))

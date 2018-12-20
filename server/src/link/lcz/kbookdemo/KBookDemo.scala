@@ -3,84 +3,39 @@ package link.lcz.kbookdemo
 import net.liftweb.json.JObject
 import scalax.collection.Graph
 import scalax.collection.edge.LDiEdge
-import scalax.collection.io.json._
 
 object KBookDemo extends App {
   val (source, transformer, sink) = (
     Dag.NodeDef(
-      Dag.NodeMeta(uuid = "1", name = "x", `type` = "source", clazz = "a.b.c"),
+      Dag.NodeMeta(uuid = "1", name = "x", `type` = Dag.NodeType.Source, clazz = "a.b.c"),
       config = JObject(),
       inbounds = List(Dag.BoundObject(config = JObject())),
       outbounds = List()),
     Dag.NodeDef(Dag.NodeMeta(uuid = "2",
       name = "y",
-      `type` = "transformer",
+      `type` = Dag.NodeType.Transformer,
       clazz = "a.b.d"),
       config = JObject(),
       inbounds = List(),
       outbounds = List()),
     Dag.NodeDef(
-      Dag.NodeMeta(uuid = "3", name = "z", `type` = "sink", clazz = "a.b.e"),
+      Dag.NodeMeta(uuid = "3", name = "z", `type` = Dag.NodeType.Sink, clazz = "a.b.e"),
       config = JObject(),
       inbounds = List(),
       outbounds = List())
   )
-  //
-  val dag = Graph[Dag.NodeDef, LDiEdge](
+
+  val dag = Dag(Graph[Dag.NodeDef, LDiEdge](
     LDiEdge(source, transformer)(Dag.EdgeMeta("xxx", 1, 0)),
     LDiEdge(transformer, sink)(Dag.EdgeMeta("yyy", 1, 2))
-  )
-  println(dag.toJson(Dag.descriptor))
+  ))
 
-  println(dag)
-  println(
-    JsonGraphCoreCompanion(Graph)
-      .fromJson[Dag.NodeDef, LDiEdge](dag.toJson(Dag.descriptor),
-      Dag.descriptor)
-      .toJson(Dag.descriptor))
+  val rendered = KBookConfig.render(new KBookConfig(KBookConfig.KBookMeta("1", "2"), dag))
+
+  println(rendered)
+  println(KBookConfig.render(KBookConfig.parse(rendered)))
+
 }
-
-//package link.lcz.kbookdemo
-//
-//import net.liftweb.json.JObject
-//import scalax.collection.Graph
-//import scalax.collection.edge.LDiEdge
-//import scalax.collection.io.json._
-//
-//object KBookDemo extends App {
-//  val (source, transformer, sink) = (
-//    Dag.LogicNode(Dag.NodeMeta(uuid = "1",
-//                                   name = "x",
-//                                   `type` = "source",
-//                                   clazz = "a.b.c"),
-//                  config = JObject(),
-//                  inbounds = List(Dag.BoundObject(config = JObject())),
-//                  outbounds = List()),
-//    Dag.LogicNode(Dag.NodeMeta(uuid = "2",
-//                                   name = "y",
-//                                   `type` = "transformer",
-//                                   clazz = "a.b.d"),
-//                  config = JObject(),
-//                  inbounds = List(),
-//                  outbounds = List()),
-//    Dag.LogicNode(Dag.NodeMeta(uuid = "3",
-//                                   name = "z",
-//                                   `type` = "sink",
-//                                   clazz = "a.b.e"),
-//                  config = JObject(),
-//                  inbounds = List(),
-//                  outbounds = List())
-//  )
-//  //
-//  val dag = Graph[Dag.LogicNode, LDiEdge](
-//    LDiEdge(source, transformer)(Dag.BoundPort(1, 0)),
-//    LDiEdge(transformer, sink)(Dag.BoundPort(1, 2))
-//  )
-//  println(dag.toJson(Dag.descriptor))
-//
-//  println(dag)
-//  println(JsonGraphCoreCompanion(Graph).fromJson[Dag.LogicNode, LDiEdge](dag.toJson(Dag.descriptor), Dag.descriptor).toJson(Dag.descriptor))
-//}
 
 //import akka.actor.ActorSystem
 //import akka.http.scaladsl.Http

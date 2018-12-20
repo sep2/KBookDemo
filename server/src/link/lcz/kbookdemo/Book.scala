@@ -5,7 +5,7 @@ import io.confluent.kafka.streams.serdes.avro.GenericAvroSerde
 import org.apache.kafka.streams.KafkaStreams
 import org.apache.kafka.streams.scala.StreamsBuilder
 
-class Book(val dag: Dag, ks: KafkaStreams) {
+class Book(val dag: KBookConfig, ks: KafkaStreams) {
   val uuid: String = dag.meta.uuid
 
   def start(): Unit = ks.start()
