@@ -12,7 +12,7 @@ import scalax.collection.io.json.{Descriptor, NodeDescriptor}
 case class Dag(dag: Graph[Dag.NodeDef, LDiEdge])
 
 object Dag {
-  val descriptor = {
+  val descriptor: Descriptor[NodeDef] = {
     val logicNodeDescriptor =
       new NodeDescriptor[NodeDef](
         customSerializers = Seq(new NodeType.Serializer)) {
@@ -21,47 +21,43 @@ object Dag {
         }
       }
 
-    class BoundedEdgeSerializer[L: Manifest](labelSerializers: Serializer[L]*)
-      extends LSerializer[L](labelSerializers: _*)
-        with Serializer[LEdgeParameters[L]] {
-      private val clazz = classOf[LEdgeParameters[_]]
+    class BoundedEdgeSerializer(labelSerializers: Serializer[EdgeLabel]*)
+      extends LSerializer[EdgeLabel](labelSerializers: _*)
+        with Serializer[LEdgeParameters[EdgeLabel]] {
 
       override def deserialize(implicit format: Formats) = {
-        case (TypeInfo(clazz, _), json) =>
+        case (TypeInfo(cls, _), json) =>
           json match {
-            case JObject(JField("node",
-            JObject(
-            JField("from", JString(n1)) :: JField(
-            "to",
-            JString(n2)) :: Nil)) :: JField(
-            "meta",
-            jsonLabel) :: Nil) =>
-              new LEdgeParameters[L](n1,
-                n2,
-                LabelSerialization.extract(jsonLabel))
+            case JObject(
+            JField("fromNode", JString(n1)) ::
+              JField("toNode", JString(n2)) ::
+              JField("uuid", JString(uuid)) ::
+              JField("fromPort", JInt(fromPort)) ::
+              JField("toPort", JInt(toPort)) ::
+              Nil) =>
+              new LEdgeParameters[EdgeLabel](n1, n2, EdgeLabel(uuid, fromPort.intValue(), toPort.intValue()))
             case x =>
               throw new MappingException(
-                "Can't convert " + x + " to " + clazz.getSimpleName)
+                "Can't convert " + x + " to " + cls.getSimpleName)
           }
       }
 
       override def serialize(implicit format: Formats) = {
         case LEdgeParameters((nId_1, nId_2), label) =>
           JObject(
-            JField("node",
-              JObject(
-                JField("from", JString(nId_1)) :: JField(
-                  "to",
-                  JString(nId_2)) :: Nil)) :: JField(
-              "meta",
-              LabelSerialization.decompose(label.asInstanceOf[L])) :: Nil)
+            JField("fromNode", JString(nId_1)) ::
+              JField("toNode", JString(nId_2)) ::
+              JField("uuid", JString(label.asInstanceOf[EdgeLabel].uuid)) ::
+              JField("fromPort", JInt(label.asInstanceOf[EdgeLabel].fromPort)) ::
+              JField("toPort", JInt(label.asInstanceOf[EdgeLabel].toPort)) ::
+              Nil)
       }
     }
 
     val boundedEdgeDescriptor =
-      LDi.descriptor[NodeDef, EdgeMeta](
-        EdgeMeta("", 0, 0),
-        Some(new BoundedEdgeSerializer[EdgeMeta]()))
+      LDi.descriptor[NodeDef, EdgeLabel](
+        EdgeLabel("", 0, 0),
+        Some(new BoundedEdgeSerializer))
 
     new Descriptor[Dag.NodeDef](
       defaultNodeDescriptor = logicNodeDescriptor,
@@ -71,7 +67,9 @@ object Dag {
 
   sealed trait NodeType
 
-  case class EdgeMeta(uuid: String, fromPort: Int, toPort: Int)
+  trait NodeConfig
+
+  case class EdgeLabel(uuid: String, fromPort: Int, toPort: Int)
 
   case class BoundObject(config: JObject)
 
@@ -84,6 +82,9 @@ object Dag {
                       name: String,
                       clazz: String,
                       `type`: NodeType)
+
+  object NodeConfig {
+  }
 
   object NodeType {
 
@@ -111,3 +112,41 @@ object Dag {
   }
 
 }
+
+
+//class BoundedEdgeSerializer[L: Manifest](labelSerializers: Serializer[L]*)
+//  extends LSerializer[L](labelSerializers: _*)
+//    with Serializer[LEdgeParameters[L]] {
+//  //private val clazz = classOf[LEdgeParameters[_]]
+//
+//  override def deserialize(implicit format: Formats) = {
+//    case (TypeInfo(cls, _), json) =>
+//      json match {
+//        case JObject(JField("node",
+//        JObject(
+//        JField("from", JString(n1)) :: JField(
+//        "to",
+//        JString(n2)) :: Nil)) :: JField(
+//        "meta",
+//        jsonLabel) :: Nil) =>
+//          new LEdgeParameters[L](n1,
+//            n2,
+//            LabelSerialization.extract(jsonLabel))
+//        case x =>
+//          throw new MappingException(
+//            "Can't convert " + x + " to " + cls.getSimpleName)
+//      }
+//  }
+//
+//  override def serialize(implicit format: Formats) = {
+//    case LEdgeParameters((nId_1, nId_2), label) =>
+//      JObject(
+//        JField("node",
+//          JObject(
+//            JField("from", JString(nId_1)) :: JField(
+//              "to",
+//              JString(nId_2)) :: Nil)) :: JField(
+//          "meta",
+//          LabelSerialization.decompose(label.asInstanceOf[L])) :: Nil)
+//  }
+//}

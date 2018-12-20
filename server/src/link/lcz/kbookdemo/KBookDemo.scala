@@ -8,25 +8,37 @@ import scalax.collection.edge.LDiEdge
 
 object KBookDemo extends App {
   org.slf4j.LoggerFactory.getLogger("org.apache.kafka").asInstanceOf[ch.qos.logback.classic.Logger].setLevel(Level.WARN)
+  org.slf4j.LoggerFactory.getLogger("io.confluent.kafka").asInstanceOf[ch.qos.logback.classic.Logger].setLevel(Level.WARN)
+
+//  println(link.lcz.kbookdemo.logicnode.sink.AvroSink.Config.getClass.getConstructors.head.getParameterCount)
+//
+//  println(Class
+//    .forName("link.lcz.kbookdemo.logicnode.sink.AvroSink$Config")
+//    .getConstructors
+//    .head
+//    .newInstance("x")
+//    .asInstanceOf[link.lcz.kbookdemo.logicnode.sink.AvroSink.Config].topicName)
+
 
   val (sink, source) = (
   Dag.NodeDef(
     Dag.NodeMeta(uuid = "2", name = "w", `type` = Dag.NodeType.Sink, clazz = "link.lcz.kbookdemo.logicnode.sink.AvroSink"),
-    config = JObject(JField("topic.name", JString("outtopic"))),
+    config = JObject(JField("topicName", JString("outtopic"))),
     inbounds = List(),
     outbounds = List()),
     Dag.NodeDef(
       Dag.NodeMeta(uuid = "1", name = "x", `type` = Dag.NodeType.Source, clazz = "link.lcz.kbookdemo.logicnode.source.AvroSource"),
-      config = JObject(JField("topic.name", JString("intopic"))),
+      config = JObject(JField("topicName", JString("intopic"))),
       inbounds = List(Dag.BoundObject(config = JObject())),
       outbounds = List())
   )
 
   val dag = Dag(Graph[Dag.NodeDef, LDiEdge](
-    LDiEdge(source, sink)(Dag.EdgeMeta("zzz", 0, 0))
+    LDiEdge(source, sink)(Dag.EdgeLabel("zzz", 0, 0))
   ))
 
-  val kBook = KBook(new KBookConfig(KBookConfig.KBookMeta("namehere", "uuidhere"), dag))
+  val kBookConfig = new KBookConfig(KBookConfig.KBookMeta("namehere", "uuidhere", "schema", "localhost:9092"), dag)
+  val kBook = KBook(KBookConfig.parse(KBookConfig.render(kBookConfig)))
 
 
   //  val rendered = KBookConfig.render(new KBookConfig(KBookConfig.KBookMeta("1", "2"), dag))

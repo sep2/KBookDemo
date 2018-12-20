@@ -1,19 +1,26 @@
 package link.lcz.kbookdemo.logicnode
 
 import com.typesafe.scalalogging.LazyLogging
+import io.confluent.kafka.streams.serdes.avro.GenericAvroSerde
 import link.lcz.kbookdemo.{Dag, KBook}
+import net.liftweb.json.DefaultFormats
 import org.apache.avro.Schema
 import org.apache.avro.generic.{GenericData, GenericRecord}
 import org.apache.kafka.streams.scala.kstream.KStream
 
 import scala.util.Try
 
-abstract class LogicNode(ctx: KBook.Context, nd: LogicNode.NodeDef)
-  extends LazyLogging {
-  val uuid = nd.meta.uuid
+abstract class LogicNode(ctx: KBook.Context, nd: LogicNode.NodeDef) extends LazyLogging {
+  val uuid: String = nd.meta.uuid
+
+  implicit val genericAvroSerde: GenericAvroSerde = ctx.Serdes.genericAvroValueSerde
+  implicit val jsonFormats: DefaultFormats = net.liftweb.json.DefaultFormats
+
+  def config[A](implicit mf: scala.reflect.Manifest[A]): A = nd.config.extract[A]
 }
 
 object LogicNode {
+
   type NodeDef = Dag.NodeDef
   type Bound = KStream[String, GenericRecord]
   type Bounds = IndexedSeq[Bound]
@@ -21,7 +28,7 @@ object LogicNode {
   def reflect[A](clazz: String)(args: AnyRef*): A =
     Class
       .forName(clazz)
-      .getConstructors
+      .getConstructors.ensuring(_.length == 1, s"Too many constructors for $clazz")
       .head
       .newInstance(args: _*)
       .asInstanceOf[A]

@@ -3,7 +3,7 @@ package link.lcz.kbookdemo.logicnode
 import link.lcz.kbookdemo.KBook
 
 abstract class Source(ctx: KBook.Context, nd: LogicNode.NodeDef) extends LogicNode(ctx, nd) with Predecessor {
-  override def outbounds: LogicNode.Bounds
+  override def outbound(idx: Int): LogicNode.Bound
 }
 
 object Source {

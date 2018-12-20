@@ -11,11 +11,11 @@ class KBookConfig(val meta: KBookConfig.KBookMeta, val dag: Dag)
 }
 
 object KBookConfig {
-  private[KBookConfig] implicit val formats = {
+  private[KBookConfig] implicit val formats: Formats = {
     val jsonGraph = scalax.collection.io.json.JsonGraphCoreCompanion(Graph)
     implicit val graphConfig = jsonGraph.companion.defaultConfig
 
-    class DagSerializer extends CustomSerializer[Dag](format => ( {
+    class DagSerializer extends CustomSerializer[Dag](_ => ( {
       case jo: JObject => Dag(jsonGraph.fromJson[Dag.NodeDef, LDiEdge](jo, Dag.descriptor))
     }, {
       case dag: Dag =>
@@ -38,6 +38,6 @@ object KBookConfig {
     net.liftweb.json.Serialization.write(kc)
   }
 
-  case class KBookMeta(uuid: String, name: String)
+  case class KBookMeta(uuid: String, name: String, schemaRegistry: String, bootstrapServers: String)
 
 }
