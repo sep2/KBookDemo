@@ -1,14 +1,12 @@
 package link.lcz.kbookdemo.logicnode.sink
 
-import link.lcz.kbookdemo.KBook
-import link.lcz.kbookdemo.logicnode.{LogicNode, Sink}
+import link.lcz.kbookdemo.logicnode.Sink
 
-class AvroSink(ctx: KBook.Context, nd: LogicNode.NodeDef, inbounds: LogicNode.Bounds) extends Sink(ctx, nd, inbounds) {
+class AvroSink(env: Sink.Environment) extends Sink[AvroSink.Config](env) {
+  import env.ctx.Serdes.conversions._
+  import env.ctx.Serdes.simpleSerdes._
 
-  import ctx.Serdes.conversions._
-  import ctx.Serdes.simpleSerdes._
-
-  inbounds.foreach(_.to(config[AvroSink.Config].topicName))
+  env.inbounds.foreach(_.to(config.topicName))
 }
 
 object AvroSink {

@@ -3,35 +3,33 @@ package link.lcz.kbookdemo.logicnode
 import com.typesafe.scalalogging.LazyLogging
 import io.confluent.kafka.streams.serdes.avro.GenericAvroSerde
 import link.lcz.kbookdemo.{Dag, KBook}
-import net.liftweb.json.DefaultFormats
 import org.apache.avro.Schema
 import org.apache.avro.generic.{GenericData, GenericRecord}
 import org.apache.kafka.streams.scala.kstream.KStream
 
 import scala.util.Try
 
-abstract class LogicNode(ctx: KBook.Context, nd: LogicNode.NodeDef) extends LazyLogging {
-  val uuid: String = nd.meta.uuid
+abstract class BaseNode(env: BaseNode.Environment) extends LazyLogging {
+  val uuid: String = env.nd.meta.uuid
 
-  implicit val genericAvroSerde: GenericAvroSerde = ctx.Serdes.genericAvroValueSerde
-  implicit val jsonFormats: DefaultFormats = net.liftweb.json.DefaultFormats
+  implicit val genericAvroSerde: GenericAvroSerde = env.ctx.Serdes.genericAvroValueSerde
 
-  def config[A](implicit mf: scala.reflect.Manifest[A]): A = nd.config.extract[A]
 }
 
-object LogicNode {
+object BaseNode {
 
   type NodeDef = Dag.NodeDef
   type Bound = KStream[String, GenericRecord]
   type Bounds = IndexedSeq[Bound]
 
-  def reflect[A](clazz: String)(args: AnyRef*): A =
-    Class
-      .forName(clazz)
-      .getConstructors.ensuring(_.length == 1, s"Too many constructors for $clazz")
-      .head
-      .newInstance(args: _*)
-      .asInstanceOf[A]
+  def reflect[A](clazz: String)(args: AnyRef*): A = {
+    import scala.reflect.runtime.{universe => ru}
+    val m = ru.runtimeMirror(getClass.getClassLoader)
+    val cs = m.classSymbol(Class.forName(clazz))
+    val cm = m.reflectClass(cs)
+    val ctor = cm.reflectConstructor(cm.symbol.info.member(ru.termNames.CONSTRUCTOR).asMethod)
+    ctor(args: _*).asInstanceOf[A]
+  }
 
   def makeRecord(schema: Schema, xs: (String, String)*): GenericRecord = {
     val r = new GenericData.Record(schema)
@@ -49,6 +47,8 @@ object LogicNode {
     }
     r
   }
+
+  abstract class Environment(val ctx: KBook.Context, val nd: BaseNode.NodeDef)
 
   object Bounds {
     def apply(xs: Bound*): Bounds = IndexedSeq(xs: _*)

@@ -1,11 +1,20 @@
 package link.lcz.kbookdemo.logicnode
 
 import link.lcz.kbookdemo.KBook
+import scala.reflect.runtime.universe.TypeTag
 
-abstract class Sink(ctx: KBook.Context, nd: LogicNode.NodeDef, inbounds: LogicNode.Bounds)
-    extends LogicNode(ctx, nd) {}
+abstract class Sink[A: TypeTag](env: Sink.Environment)
+    extends ConfiguredNode[A](env)
 
 object Sink {
-  def apply(ctx: KBook.Context, nd: LogicNode.NodeDef, inbounds: LogicNode.Bounds): Sink =
-    LogicNode.reflect[Sink](nd.meta.clazz)(ctx, nd, inbounds)
+
+  def apply(clazz: String, env: Sink.Environment): Sink[_] =
+    BaseNode.reflect[Sink[_]](clazz)(env)
+
+  case class Environment(
+                          override val ctx: KBook.Context,
+                          override val nd: BaseNode.NodeDef,
+                          inbounds: BaseNode.Bounds
+  ) extends BaseNode.Environment(ctx, nd)
+
 }

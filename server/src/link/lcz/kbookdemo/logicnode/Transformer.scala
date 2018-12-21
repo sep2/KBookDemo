@@ -1,14 +1,21 @@
 package link.lcz.kbookdemo.logicnode
 
 import link.lcz.kbookdemo.KBook
+import scala.reflect.runtime.universe.TypeTag
 
-abstract class Transformer(ctx: KBook.Context, nd: LogicNode.NodeDef, inbounds: LogicNode.Bounds)
-  extends LogicNode(ctx, nd) with Predecessor {
-  override def outbound(idx: Int): LogicNode.Bound
-}
-
+abstract class Transformer[A: TypeTag](env: Transformer.Environment)
+    extends ConfiguredNode[A](env)
+    with Predecessor
 
 object Transformer {
-  def apply(ctx: KBook.Context, nd: LogicNode.NodeDef, inbounds: LogicNode.Bounds): Transformer =
-    LogicNode.reflect[Transformer](nd.meta.clazz)(ctx, nd, inbounds)
+
+  def apply(clazz: String, env: Transformer.Environment): Transformer[_] =
+    BaseNode.reflect[Transformer[_]](clazz)(env)
+
+  case class Environment(
+                          override val ctx: KBook.Context,
+                          override val nd: BaseNode.NodeDef,
+                          inbounds: BaseNode.Bounds
+  ) extends BaseNode.Environment(ctx, nd)
+
 }

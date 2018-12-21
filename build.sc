@@ -6,9 +6,9 @@ import coursier.maven.MavenRepository
 object server extends ScalaModule {
   def scalaVersion = "2.12.8"
 
-  def compileIvyDeps = Agg(ivy"com.lihaoyi::acyclic:0.1.7")
-  def scalacOptions = Seq("-P:acyclic:force")
-  def scalacPluginIvyDeps = Agg(ivy"com.lihaoyi::acyclic:0.1.7")
+  //def compileIvyDeps = Agg(ivy"com.lihaoyi::acyclic:0.1.7")
+  //def scalacOptions = Seq("-P:acyclic:force")
+  //def scalacPluginIvyDeps = Agg(ivy"com.lihaoyi::acyclic:0.1.7")
 
   def repositories = super.repositories ++ Seq(
     MavenRepository("https://packages.confluent.io/maven")
