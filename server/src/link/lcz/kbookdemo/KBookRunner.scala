@@ -18,6 +18,8 @@ object KBookRunner extends LazyLogging {
 
   case class DeleteBook(uuid: String) extends Command
 
+  case class ShowBook(uuid: String) extends Command
+
 }
 
 class KBookRunner extends Actor with LazyLogging {
@@ -27,7 +29,7 @@ class KBookRunner extends Actor with LazyLogging {
   private val store = mutable.Set[KBook]()
 
   override def receive = {
-    case PostBook(bd) => {
+    case PostBook(bd) =>
       logger.info(s"post")
       val kbc = KBookConfig.parse(bd)
       if (store.exists(_.uuid == kbc.meta.uuid)) {
@@ -35,7 +37,12 @@ class KBookRunner extends Actor with LazyLogging {
       } else {
         store.add(KBook(kbc))
       }
-    }
+    case ShowBook(uuid) =>
+      logger.info(s"show")
+      store.find(_.uuid == uuid) match {
+        case Some(kBook) => sender() ! kBook.config
+        case None => logger.error(s"[$uuid] not found")
+      }
     case PlayBook(uuid) =>
       logger.info(s"play")
       store.find(_.uuid == uuid) match {

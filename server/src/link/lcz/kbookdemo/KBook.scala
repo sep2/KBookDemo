@@ -9,6 +9,7 @@ import org.apache.kafka.streams.{KafkaStreams, Topology}
 
 class KBook(ctx: KBook.Context) extends LazyLogging {
   val uuid: String = ctx.config.meta.uuid
+  val config: String = ctx.config.toString
 
   private val streamsConfiguration: Properties = {
     val p = new Properties()

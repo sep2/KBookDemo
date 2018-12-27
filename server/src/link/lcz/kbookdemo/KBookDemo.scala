@@ -3,13 +3,17 @@ package link.lcz.kbookdemo
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
-import akka.http.scaladsl.server.Directives.{path, _}
+import akka.http.scaladsl.server.Directives._
+import akka.pattern.ask
 import akka.stream.ActorMaterializer
+import akka.util.Timeout
 import ch.qos.logback.classic.Level
 import com.typesafe.scalalogging.LazyLogging
-import net.liftweb.json.JsonAST.{JBool, JField, JObject}
+import net.liftweb.json.JsonAST.{JBool, JField, JObject, JString}
 
+import scala.concurrent.duration.{Duration, SECONDS}
 import scala.io.StdIn
+import scala.util.{Failure, Success}
 
 object KBookDemo extends App with LazyLogging {
   org.slf4j.LoggerFactory
@@ -21,34 +25,43 @@ object KBookDemo extends App with LazyLogging {
     .asInstanceOf[ch.qos.logback.classic.Logger]
     .setLevel(Level.WARN)
 
-  val responseOk = {
-    implicit val jsonFormats = net.liftweb.json.DefaultFormats
-    net.liftweb.json.Serialization.write(JObject(JField("status", JBool(true))))
-  }
-
-  val completeWithOK = complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, responseOk))
-
   implicit val system: ActorSystem = ActorSystem("KBookDemo")
   implicit val materializer = ActorMaterializer()
   // needed for the future flatMap/onComplete in the end
   implicit val executionContext = system.dispatcher
 
-  val kBookRunner = system.actorOf(KBookRunner.props, "kBookRunner")
+  def completeWithFail(error: String) = complete(HttpEntity(ContentTypes.`application/json`, responseFail(error)))
 
+  def responseFail(error: String) = {
+    implicit val jsonFormats = net.liftweb.json.DefaultFormats
+    net.liftweb.json.Serialization.write(JObject(JField("status", JBool(false)), JField("message", JString(error))))
+  }
+
+  val responseOk = {
+    implicit val jsonFormats = net.liftweb.json.DefaultFormats
+    net.liftweb.json.Serialization.write(JObject(JField("status", JBool(true))))
+  }
+  val completeWithOk = complete(HttpEntity(ContentTypes.`application/json`, responseOk))
+  val kBookRunner = system.actorOf(KBookRunner.props, "kBookRunner")
   val route =
     (post & path("book" / "post") & entity(as[String])) { body =>
       kBookRunner ! KBookRunner.PostBook(body)
-      completeWithOK
+      completeWithOk
     } ~ ((post | get) & parameter('uuid)) { uuid =>
       path("book" / "play") {
         kBookRunner ! KBookRunner.PlayBook(uuid)
-        completeWithOK
+        completeWithOk
       } ~ path("book" / "stop") {
         kBookRunner ! KBookRunner.StopBook(uuid)
-        completeWithOK
+        completeWithOk
       } ~ path("book" / "delete") {
         kBookRunner ! KBookRunner.DeleteBook(uuid)
-        completeWithOK
+        completeWithOk
+      } ~ path("book" / "show") {
+        onComplete(kBookRunner.ask(KBookRunner.ShowBook(uuid))(Timeout(Duration(3, SECONDS)))) {
+          case Success(j) => complete(HttpEntity(ContentTypes.`application/json`, j.asInstanceOf[String]))
+          case Failure(ex) => completeWithFail(ex.getMessage)
+        }
       }
     }
 
