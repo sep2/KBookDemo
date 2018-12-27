@@ -15,7 +15,7 @@ object Transformer {
   case class Environment(
                           override val ctx: KBook.Context,
                           override val nd: BaseNode.NodeDef,
-                          inbounds: BaseNode.Bounds
+                          inbounds: BaseNode.SchemaBounds
   ) extends BaseNode.Environment(ctx, nd)
 
 }

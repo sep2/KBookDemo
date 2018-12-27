@@ -14,8 +14,10 @@ abstract class BaseNode(val env: BaseNode.Environment) extends LazyLogging {
 object BaseNode {
 
   type NodeDef = Dag.NodeDef
+  type Schema = org.apache.avro.Schema
   type Bound = KStream[String, GenericRecord]
-  type Bounds = IndexedSeq[Bound]
+  case class SchemaBound(bound: Bound, schema: Schema)
+  type SchemaBounds = IndexedSeq[SchemaBound]
 
   def reflect[A](clazz: String)(args: AnyRef*): A = {
     import scala.reflect.runtime.{universe => ru}
@@ -30,8 +32,8 @@ object BaseNode {
     val uuid: String = nd.meta.uuid
   }
 
-  object Bounds {
-    def apply(xs: Bound*): Bounds = IndexedSeq(xs: _*)
+  object SchemaBounds {
+    def apply(xs: Seq[SchemaBound]): SchemaBounds = xs.toIndexedSeq
   }
 
 }

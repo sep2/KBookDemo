@@ -35,6 +35,20 @@
       {
         "meta": {
           "uuid": "sdhfoughogfreg8re2",
+          "name": "Constant Adder",
+          "clazz": "link.lcz.kbookdemo.logicnode.transformer.ConstantAdder",
+          "type": "transformer"
+        },
+        "config": {
+          "field": "age",
+          "constant": 10
+        },
+        "inbounds": [],
+        "outbounds": []
+      },
+      {
+        "meta": {
+          "uuid": "kythtrjyyrterjher3",
           "name": "Avro Sink",
           "clazz": "link.lcz.kbookdemo.logicnode.sink.AvroSink",
           "type": "sink"
@@ -51,6 +65,13 @@
         "fromNode": "akdsjflkdsjflkasdfs1",
         "toNode": "sdhfoughogfreg8re2",
         "uuid": "a",
+        "fromPort": 0,
+        "toPort": 0
+      },
+      {
+        "fromNode": "sdhfoughogfreg8re2",
+        "toNode": "kythtrjyyrterjher3",
+        "uuid": "b",
         "fromPort": 0,
         "toPort": 0
       }

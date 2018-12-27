@@ -9,7 +9,7 @@ class AvroSink(env: Sink.Environment) extends Sink[AvroSink.Config](env) {
   import org.apache.kafka.streams.scala.Serdes._
   import org.apache.kafka.streams.scala.ImplicitConversions._
 
-  env.inbounds.foreach(_.to(config.topicName))
+  env.inbounds.foreach(_.bound.to(config.topicName))
 }
 
 object AvroSink {

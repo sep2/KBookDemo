@@ -1,10 +1,10 @@
 package link.lcz.kbookdemo.logicnode.transformer
 
-import link.lcz.kbookdemo.logicnode.BaseNode.Bound
-import link.lcz.kbookdemo.logicnode.Transformer
+import link.lcz.kbookdemo.logicnode.{BaseNode, Transformer}
 
 class Copy(env: Transformer.Environment) extends Transformer[Copy.Config](env) {
-  override def outbound(idx: Int): Bound = env.inbounds(0)
+  override def outbound(idx: Int): BaseNode.SchemaBound = env.inbounds(0)
+
 }
 
 object Copy {

@@ -56,15 +56,15 @@ object KBook extends LazyLogging {
     // Since side effect is performed in the constructor of each LogicNode
     // we do not have to capture the result of this operation (unlike Spark)
     linearized.foldLeft(List[BaseNode]())((constructed, current) => {
-      val inbounds = current.incoming.toSeq
+      val inbounds = BaseNode.SchemaBounds(current.incoming.toSeq
         .map { edge =>
           constructed.find(_.env.uuid == edge.from.toOuter.meta.uuid) -> edge.label.asInstanceOf[Dag.EdgeLabel]
         }
         .collect { case (Some(node), edge) => node -> edge }
         .sortBy(_._2.toPort)
-        .foldLeft(BaseNode.Bounds()) { (ibs, x) =>
+        .foldLeft(Seq[BaseNode.SchemaBound]()) { (ibs, x) =>
           ibs :+ x._1.asInstanceOf[logicnode.Predecessor].outbound(x._2.fromPort)
-        }
+        })
 
       val nodeConfig = current.toOuter
       val clazz = nodeConfig.meta.clazz
@@ -96,9 +96,9 @@ object KBook extends LazyLogging {
 
     // FIXME: too many import needed
     object Serdes {
-//      implicit val simpleSerdes = org.apache.kafka.streams.scala.Serdes
-//      implicit val conversions =
-//        org.apache.kafka.streams.scala.ImplicitConversions
+      //      implicit val simpleSerdes = org.apache.kafka.streams.scala.Serdes
+      //      implicit val conversions =
+      //        org.apache.kafka.streams.scala.ImplicitConversions
 
       import io.confluent.kafka.streams.serdes.avro.GenericAvroSerde
 
