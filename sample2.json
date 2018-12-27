@@ -1,0 +1,110 @@
+{
+  "meta": {
+    "uuid": "abcdefgh",
+    "name": "KBook Demo",
+    "schemaRegistry": "http://localhost:8081",
+    "bootstrapServers": "localhost:9092"
+  },
+  "dag": {
+    "nodes": [
+      {
+        "meta": {
+          "uuid": "4",
+          "name": "Avro Sink 2",
+          "clazz": "link.lcz.kbookdemo.logicnode.sink.AvroSink",
+          "type": "sink"
+        },
+        "config": {
+          "topicName": "outtopic3"
+        },
+        "inbounds": [],
+        "outbounds": []
+      },
+      {
+        "meta": {
+          "uuid": "1",
+          "name": "Avro Source",
+          "clazz": "link.lcz.kbookdemo.logicnode.source.AvroSource",
+          "type": "source"
+        },
+        "config": {
+          "topicName": "intopic"
+        },
+        "inbounds": [],
+        "outbounds": []
+      },
+      {
+        "meta": {
+          "uuid": "5",
+          "name": "Copy 2",
+          "clazz": "link.lcz.kbookdemo.logicnode.transformer.Copy",
+          "type": "transformer"
+        },
+        "config": {},
+        "inbounds": [],
+        "outbounds": []
+      },
+      {
+        "meta": {
+          "uuid": "2",
+          "name": "Avro Sink 1",
+          "clazz": "link.lcz.kbookdemo.logicnode.sink.AvroSink",
+          "type": "sink"
+        },
+        "config": {
+          "topicName": "outtopic1"
+        },
+        "inbounds": [],
+        "outbounds": []
+      },
+      {
+        "meta": {
+          "uuid": "3",
+          "name": "Copy 1",
+          "clazz": "link.lcz.kbookdemo.logicnode.transformer.Copy",
+          "type": "transformer"
+        },
+        "config": {},
+        "inbounds": [],
+        "outbounds": []
+      }
+    ],
+    "edges": [
+      {
+        "fromNode": "5",
+        "toNode": "4",
+        "uuid": "e",
+        "fromPort": 0,
+        "toPort": 1
+      },
+      {
+        "fromNode": "1",
+        "toNode": "3",
+        "uuid": "a",
+        "fromPort": 0,
+        "toPort": 0
+      },
+      {
+        "fromNode": "3",
+        "toNode": "2",
+        "uuid": "b",
+        "fromPort": 0,
+        "toPort": 0
+      },
+      {
+        "fromNode": "3",
+        "toNode": "5",
+        "uuid": "d",
+        "fromPort": 2,
+        "toPort": 0
+      },
+      {
+        "fromNode": "3",
+        "toNode": "4",
+        "uuid": "c",
+        "fromPort": 1,
+        "toPort": 0
+      }
+    ]
+  }
+}

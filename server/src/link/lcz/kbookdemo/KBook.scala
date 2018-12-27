@@ -10,7 +10,7 @@ import org.apache.kafka.streams.{KafkaStreams, Topology}
 class KBook(ctx: KBook.Context) extends LazyLogging {
   val uuid: String = ctx.config.meta.uuid
 
-  val streamsConfiguration: Properties = {
+  private val streamsConfiguration: Properties = {
     val p = new Properties()
     import org.apache.kafka.streams.StreamsConfig
     p.put(StreamsConfig.APPLICATION_ID_CONFIG, s"kbook-$uuid")
@@ -22,7 +22,7 @@ class KBook(ctx: KBook.Context) extends LazyLogging {
     p
   }
 
-  val streams: KafkaStreams = {
+  private val streams: KafkaStreams = {
     logger.info(ctx.topology.describe().toString)
     new KafkaStreams(ctx.topology, streamsConfiguration)
   }
@@ -30,6 +30,14 @@ class KBook(ctx: KBook.Context) extends LazyLogging {
   def start(): Unit = streams.start()
 
   def stop(): Unit = streams.close()
+
+  override def equals(o: Any): Boolean = o match {
+    case kb: KBook => this.uuid == kb.uuid
+    case _ => false
+  }
+
+  override def hashCode(): Int = uuid.hashCode
+
 }
 
 object KBook extends LazyLogging {
@@ -50,7 +58,7 @@ object KBook extends LazyLogging {
     linearized.foldLeft(List[BaseNode]())((constructed, current) => {
       val inbounds = current.incoming.toSeq
         .map { edge =>
-          constructed.find(_.uuid == edge.from.toOuter.meta.uuid) -> edge.label.asInstanceOf[Dag.EdgeLabel]
+          constructed.find(_.env.uuid == edge.from.toOuter.meta.uuid) -> edge.label.asInstanceOf[Dag.EdgeLabel]
         }
         .collect { case (Some(node), edge) => node -> edge }
         .sortBy(_._2.toPort)
@@ -88,9 +96,9 @@ object KBook extends LazyLogging {
 
     // FIXME: too many import needed
     object Serdes {
-      implicit val simpleSerdes = org.apache.kafka.streams.scala.Serdes
-      implicit val conversions =
-        org.apache.kafka.streams.scala.ImplicitConversions
+//      implicit val simpleSerdes = org.apache.kafka.streams.scala.Serdes
+//      implicit val conversions =
+//        org.apache.kafka.streams.scala.ImplicitConversions
 
       import io.confluent.kafka.streams.serdes.avro.GenericAvroSerde
 

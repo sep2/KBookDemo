@@ -1,0 +1,59 @@
+{
+  "meta": {
+    "uuid": "abcdefgh",
+    "name": "KBook Demo",
+    "schemaRegistry": "http://localhost:8081",
+    "bootstrapServers": "localhost:9092"
+  },
+  "dag": {
+    "nodes": [
+      {
+        "meta": {
+          "uuid": "akdsjflkdsjflkasdfs1",
+          "name": "KVP Source",
+          "clazz": "link.lcz.kbookdemo.logicnode.source.KVPSource",
+          "type": "source"
+        },
+        "config": {
+          "topicNames": [
+            "intopic"
+          ],
+          "fields": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "age",
+              "type": "int"
+            }
+          ]
+        },
+        "inbounds": [],
+        "outbounds": []
+      },
+      {
+        "meta": {
+          "uuid": "sdhfoughogfreg8re2",
+          "name": "Avro Sink",
+          "clazz": "link.lcz.kbookdemo.logicnode.sink.AvroSink",
+          "type": "sink"
+        },
+        "config": {
+          "topicName": "outtopic"
+        },
+        "inbounds": [],
+        "outbounds": []
+      }
+    ],
+    "edges": [
+      {
+        "fromNode": "akdsjflkdsjflkasdfs1",
+        "toNode": "sdhfoughogfreg8re2",
+        "uuid": "a",
+        "fromPort": 0,
+        "toPort": 0
+      }
+    ]
+  }
+}

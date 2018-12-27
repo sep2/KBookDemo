@@ -3,17 +3,12 @@ package link.lcz.kbookdemo.logicnode
 import com.typesafe.scalalogging.LazyLogging
 import io.confluent.kafka.streams.serdes.avro.GenericAvroSerde
 import link.lcz.kbookdemo.{Dag, KBook}
-import org.apache.avro.Schema
-import org.apache.avro.generic.{GenericData, GenericRecord}
+import org.apache.avro.generic.GenericRecord
 import org.apache.kafka.streams.scala.kstream.KStream
 
-import scala.util.Try
-
-abstract class BaseNode(env: BaseNode.Environment) extends LazyLogging {
-  val uuid: String = env.nd.meta.uuid
-
-  implicit val genericAvroSerde: GenericAvroSerde = env.ctx.Serdes.genericAvroValueSerde
-
+abstract class BaseNode(val env: BaseNode.Environment) extends LazyLogging {
+  implicit protected val genericAvroSerde: GenericAvroSerde = env.ctx.Serdes.genericAvroValueSerde
+  logger.info(s"[${env.nd.meta.name}] gets constructed.")
 }
 
 object BaseNode {
@@ -31,24 +26,9 @@ object BaseNode {
     ctor(args: _*).asInstanceOf[A]
   }
 
-  def makeRecord(schema: Schema, xs: (String, String)*): GenericRecord = {
-    val r = new GenericData.Record(schema)
-    xs.foreach { x =>
-      Try[AnyRef] {
-        schema.getField(x._1).schema().getType match {
-          case Schema.Type.STRING => x._2.asInstanceOf[AnyRef]
-          case Schema.Type.DOUBLE => x._2.toDouble.asInstanceOf[AnyRef]
-          case Schema.Type.FLOAT => x._2.toFloat.asInstanceOf[AnyRef]
-          case Schema.Type.INT => x._2.toInt.asInstanceOf[AnyRef]
-          case Schema.Type.LONG => x._2.toLong.asInstanceOf[AnyRef]
-          case unknown => throw new RuntimeException(s"unknown type: $unknown")
-        }
-      }.foreach(r.put(x._1, _))
-    }
-    r
+  abstract class Environment(val ctx: KBook.Context, val nd: BaseNode.NodeDef) {
+    val uuid: String = nd.meta.uuid
   }
-
-  abstract class Environment(val ctx: KBook.Context, val nd: BaseNode.NodeDef)
 
   object Bounds {
     def apply(xs: Bound*): Bounds = IndexedSeq(xs: _*)

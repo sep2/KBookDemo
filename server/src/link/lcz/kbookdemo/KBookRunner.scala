@@ -8,24 +8,48 @@ import scala.collection.mutable
 object KBookRunner extends LazyLogging {
   def props: Props = Props[KBookRunner]
 
-  case class PostBook(bookDefinition: String)
-  case class PlayBook(bookUuid: String)
-  case class StopBook(bookUuid: String)
-  case class DeleteBook(bookUuid: String)
+  sealed trait Command
+
+  case class PostBook(bookDefinition: String) extends Command
+
+  case class PlayBook(uuid: String) extends Command
+
+  case class StopBook(uuid: String) extends Command
+
+  case class DeleteBook(uuid: String) extends Command
+
 }
 
 class KBookRunner extends Actor with LazyLogging {
+
   import KBookRunner._
 
   private val store = mutable.Set[KBook]()
 
   override def receive = {
-    case PostBook(bd)     => {
-      logger.info("not implemented")
-      //store.add(Dag.parse(bd).construct())
+    case PostBook(bd) => {
+      logger.info(s"post")
+      val kbc = KBookConfig.parse(bd)
+      if (store.exists(_.uuid == kbc.meta.uuid)) {
+        logger.error(s"[${kbc.meta.uuid}] already exists")
+      } else {
+        store.add(KBook(kbc))
+      }
     }
-    case PlayBook(uuid)   => store.find(_.uuid == uuid)
-    case StopBook(uuid)   => store.find(_.uuid == uuid)
-    case DeleteBook(uuid) => store.find(_.uuid == uuid)
+    case PlayBook(uuid) =>
+      logger.info(s"play")
+      store.find(_.uuid == uuid) match {
+        case Some(kBook) => kBook.start()
+        case None => logger.error(s"[$uuid] not found")
+      }
+    case StopBook(uuid) =>
+      logger.info(s"stop")
+      store.find(_.uuid == uuid) match {
+        case Some(kBook) => kBook.stop()
+        case None => logger.error(s"[$uuid] not found")
+      }
+    case DeleteBook(uuid) =>
+      logger.info(s"delete")
+      store.retain(_.uuid != uuid)
   }
 }
