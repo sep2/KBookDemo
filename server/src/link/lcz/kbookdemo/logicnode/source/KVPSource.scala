@@ -20,9 +20,11 @@ class KVPSource(env: Source.Environment) extends Source[KVPSource.Config](env) {
 
   logger.info(s"${env.nd.meta.name} schema: $schema")
 
+  private val recordMaker = (raw: String) => makeRecord(schema, raw)
+
   override def outbound(idx: Int): BaseNode.Bound =
     env.ctx.stream[String, String](config.topicNames)
-      .map[String, GenericRecord]((k, raw) => k -> makeRecord(schema, raw))
+      .map[String, GenericRecord]((k, raw) => k -> recordMaker(raw))
 
   private def makeRecord(schema: Schema, raw: String): GenericRecord = {
     val r = new GenericData.Record(schema)
