@@ -12,7 +12,7 @@ import com.typesafe.scalalogging.LazyLogging
 import net.liftweb.json.JsonAST.{JBool, JField, JObject, JString}
 
 import scala.concurrent.duration.{Duration, SECONDS}
-import scala.io.StdIn
+import scala.io.{Source, StdIn}
 import scala.util.{Failure, Success}
 
 object KBookDemo extends App with LazyLogging {
@@ -29,6 +29,7 @@ object KBookDemo extends App with LazyLogging {
   implicit val materializer = ActorMaterializer()
   // needed for the future flatMap/onComplete in the end
   implicit val executionContext = system.dispatcher
+  implicit val askTimeout = Timeout(Duration(3, SECONDS))
 
   def completeWithFail(error: String) = complete(HttpEntity(ContentTypes.`application/json`, responseFail(error)))
 
@@ -41,12 +42,20 @@ object KBookDemo extends App with LazyLogging {
     implicit val jsonFormats = net.liftweb.json.DefaultFormats
     net.liftweb.json.Serialization.write(JObject(JField("status", JBool(true))))
   }
+
   val completeWithOk = complete(HttpEntity(ContentTypes.`application/json`, responseOk))
+
   val kBookRunner = system.actorOf(KBookRunner.props, "kBookRunner")
+
   val route =
     (post & path("book" / "post") & entity(as[String])) { body =>
       kBookRunner ! KBookRunner.PostBook(body)
       completeWithOk
+    } ~ path("node"/ "list") {
+      onComplete(kBookRunner.ask(KBookRunner.ListNode)) {
+        case Success(j) => complete(HttpEntity(ContentTypes.`application/json`, j.asInstanceOf[String]))
+        case Failure(ex) => completeWithFail(ex.getMessage)
+      }
     } ~ ((post | get) & parameter('uuid)) { uuid =>
       path("book" / "play") {
         kBookRunner ! KBookRunner.PlayBook(uuid)
@@ -58,7 +67,7 @@ object KBookDemo extends App with LazyLogging {
         kBookRunner ! KBookRunner.DeleteBook(uuid)
         completeWithOk
       } ~ path("book" / "show") {
-        onComplete(kBookRunner.ask(KBookRunner.ShowBook(uuid))(Timeout(Duration(3, SECONDS)))) {
+        onComplete(kBookRunner.ask(KBookRunner.ShowBook(uuid))) {
           case Success(j) => complete(HttpEntity(ContentTypes.`application/json`, j.asInstanceOf[String]))
           case Failure(ex) => completeWithFail(ex.getMessage)
         }

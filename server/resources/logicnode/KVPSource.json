@@ -1,0 +1,40 @@
+{
+  "meta": {
+    "name": "KVP Source",
+    "clazz": "link.lcz.kbookdemo.logicnode.source.KVPSource",
+    "type": "source"
+  },
+  "config": {
+    "topicNames": [
+      "intopic"
+    ],
+    "fields": [
+      {
+        "name": "name",
+        "type": "string"
+      },
+      {
+        "name": "age",
+        "type": "int"
+      }
+    ]
+  },
+  "configDSL": [
+    {
+      "control": "arrayBox",
+      "key": "topicNames",
+      "array": {
+        "control": "stringBox"
+      }
+    },
+    {
+      "control": "arrayBox",
+      "key": "fields",
+      "array": {
+        "control": "schemaBox"
+      }
+    }
+  ],
+  "inbounds": [],
+  "outbounds": []
+}

@@ -3,8 +3,7 @@ package link.lcz.kbookdemo.logicnode
 import link.lcz.kbookdemo.KBook
 import scala.reflect.runtime.universe.TypeTag
 
-abstract class Sink[A: TypeTag](env: Sink.Environment)
-    extends ConfiguredNode[A](env)
+abstract class Sink[A: TypeTag](env: Sink.Environment) extends ConfiguredNode[A](env)
 
 object Sink {
 

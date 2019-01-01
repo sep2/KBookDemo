@@ -9,6 +9,9 @@ import org.apache.kafka.streams.scala.kstream.KStream
 abstract class BaseNode(val env: BaseNode.Environment) extends LazyLogging {
   implicit protected val genericAvroSerde: GenericAvroSerde = env.ctx.Serdes.genericAvroValueSerde
   logger.info(s"[${env.nd.meta.name}] gets constructed.")
+
+//  import org.apache.kafka.streams.scala.Serdes._
+//  import org.apache.kafka.streams.scala.ImplicitConversions._
 }
 
 object BaseNode {

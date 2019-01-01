@@ -1,0 +1,18 @@
+{
+  "meta": {
+    "name": "Avro Sink",
+    "clazz": "link.lcz.kbookdemo.logicnode.sink.AvroSink",
+    "type": "sink"
+  },
+  "config": {
+    "topicName": "intopic"
+  },
+  "configDSL": [
+    {
+      "control": "stringBox",
+      "key": "topicName"
+    }
+  ],
+  "inbounds": [],
+  "outbounds": []
+}

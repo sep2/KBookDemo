@@ -1,0 +1,18 @@
+{
+  "meta": {
+    "name": "Avro Source",
+    "clazz": "link.lcz.kbookdemo.logicnode.source.AvroSource",
+    "type": "source"
+  },
+  "config": {
+    "topicName": "outtopic"
+  },
+  "configDSL": [
+    {
+      "control": "stringBox",
+      "key": "topicName"
+    }
+  ],
+  "inbounds": [],
+  "outbounds": []
+}

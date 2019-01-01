@@ -1,0 +1,23 @@
+{
+  "meta": {
+    "name": "Constant Adder",
+    "clazz": "link.lcz.kbookdemo.logicnode.transformer.ConstantAdder",
+    "type": "transformer"
+  },
+  "config": {
+    "field": "age",
+    "constant": 10
+  },
+  "configDSL": [
+    {
+      "control": "stringBox",
+      "key": "field"
+    },
+    {
+      "control": "integerBox",
+      "key": "constant"
+    }
+  ],
+  "inbounds": [],
+  "outbounds": []
+}

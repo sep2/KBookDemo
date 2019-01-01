@@ -2,8 +2,10 @@ package link.lcz.kbookdemo
 
 import akka.actor.{Actor, Props}
 import com.typesafe.scalalogging.LazyLogging
+import net.liftweb.json.JsonAST.JArray
 
 import scala.collection.mutable
+import scala.io.Source
 
 object KBookRunner extends LazyLogging {
   def props: Props = Props[KBookRunner]
@@ -20,6 +22,8 @@ object KBookRunner extends LazyLogging {
 
   case class ShowBook(uuid: String) extends Command
 
+  case class ListNode() extends Command
+
 }
 
 class KBookRunner extends Actor with LazyLogging {
@@ -27,6 +31,16 @@ class KBookRunner extends Actor with LazyLogging {
   import KBookRunner._
 
   private val store = mutable.Set[KBook]()
+
+  private val logicNodeStr = net.liftweb.json.compactRender(
+    JArray(
+      new java.io.File(Option(getClass.getResource("/logicnode")).get.getPath)
+        .listFiles()
+        .map(Source.fromFile(_).mkString)
+        .map(net.liftweb.json.parse)
+        .toList
+    )
+  )
 
   override def receive = {
     case PostBook(bd) =>
@@ -58,5 +72,8 @@ class KBookRunner extends Actor with LazyLogging {
     case DeleteBook(uuid) =>
       logger.info(s"delete")
       store.retain(_.uuid != uuid)
+    case ListNode =>
+      logger.info(s"list node")
+      sender() ! logicNodeStr
   }
 }
