@@ -32,6 +32,7 @@ class KBookRunner extends Actor with LazyLogging {
 
   private val store = mutable.Set[KBook]()
 
+  // FIXME: only works in intellij, failed in assembly jar
   private val logicNodeStr = net.liftweb.json.compactRender(
     JArray(
       new java.io.File(Option(getClass.getResource("/logicnode")).get.getPath)
