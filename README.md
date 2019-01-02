@@ -5,13 +5,22 @@ from a DAG (directed acyclic graph, see *sample1.json*). End-users submits DAG d
 (called KBook, which will be run as Kafka Streams Tasks) to the server and
 are possible to visualize, manage and inspect these jobs.
 
-# Compile
+Currently only sample APIs are provided, please see *KBookDemo.scala* for details. With
+these APIs, you may submit, start, stop, delete and query a KBook instance. 
+
+The next step in the roadmap is to leverage Zookeeper or other cluster negotiators to
+turn on High Availability.
+
+# Usage
+[Mill](http://www.lihaoyi.com/mill/) is the build tool used by KBookDemo.
+
+## compile
 `mill server.compile`
 
-# Assembly jar
+## Assembly Jar
 `mill server.assembly`
 
-# Run
+## Run
 `java -jar KBookDemo.jar`
 
 # License
