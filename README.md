@@ -13,7 +13,7 @@ Behind the sense, the DAG is translated into an instance of *Kafka Streams Topol
 is worth mentioned that in spite of this demo leveraging Kafka Streams to provide
 parallelism and fault-tolerance, the same algorithm/concept can be used in other 
 streaming data processing frameworks (Spark, Flink) as well. You can see how the algorithm
-is applied in *KBook.Scala*.
+is applied in [KBook.Scala](https://github.com/sep2/KBookDemo/blob/master/server/src/link/lcz/kbookdemo/KBook.scala).
 
 The next step in the roadmap is to to turn on High Availability with Zookeeper.
 
