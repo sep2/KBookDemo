@@ -1,6 +1,6 @@
 # Description
 KBookDemo aims to provide a simple way to define real-time streaming data processing
-from a DAG (directed acyclic graph). End-users submits DAG definition (called KBook,
+from a DAG (directed acyclic graph). End-user submits DAG definition (called KBook,
 which will be run as Kafka Streams Tasks) to the server and the server is responsible
 for start/stop/monitor these instances. Since the DAG itself is just a json description
 of the graph (see *sample1.json*), it is possible to visually build the DAG using some
